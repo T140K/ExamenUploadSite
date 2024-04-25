@@ -1,0 +1,218 @@
+﻿@page
+@model VideoUploadSite.Pages.iosrecordtestModel
+@{
+    //downlaod video to camera roll, 
+    //upload the previewvideo with title and desc
+}
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/uuid/8.3.2/uuid.min.js"></script>
+
+}
+<head>
+    <style>
+        #container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        #cameraPreview, #previewVideo {
+            display: block;
+            padding: 1em;
+            margin: auto;
+            max-width: 100%;
+            max-height: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div>
+        <div>
+            <button class="generic-btn" id="startButton">Start Recording</button>
+            <button class="generic-btn" id="stopButton" style="display: none;">Stop Recording</button>
+            <video id="cameraPreview" autoplay muted playsinline style="max-width: 80%; max-height: auto;"></video>
+            <br />
+        </div>
+        <div id="previewContainer" style="display: none;">
+            <video id="previewVideo" controls style="max-width: 80%; max-height: auto;"></video>
+            <button class="generic-btn" id="downloadButton">Download Recording</button>
+            <br />
+            <br />
+            <form id="uploadForm" method="post" action="/api/Videos/Upload" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="videoTitle">Video Title:</label>
+                    <input type="text" id="videoTitle" name="VideoTitle" required />
+                </div>
+                <div class="form-group">
+                    <label for="videoDescription">Video Description:</label>
+                    <textarea id="videoDescription" name="VideoDescription" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="thumbnail">Select Thumbnail Image:</label>
+                    <input type="file" id="thumbnail" name="Thumbnail" accept="image/png, image/jpeg" />
+                </div>
+                <button type="button" class="generic-btn" id="azureUploadButton">Upload</button>
+                @*<input type="submit" value="Submit" class="generic-btn"/>*@
+            </form>
+
+            @*<div class="form-group">
+                <label for="videoTitle">Video Title:</label>
+                <input type="text" id="videoTitle" name="VideoTitle" required />
+            </div>
+            <div class="form-group">
+                <label for="thumbnail">Select Thumbnail Image:</label>
+                <input type="file" id="thumbnail" name="Thumbnail" accept="image/png, image/jpeg" />
+            </div>
+            <div class="form-group">
+                <label for="videoDescription">Video Description:</label>
+                <textarea id="videoDescription" name="VideoDescription" required></textarea>
+            </div>
+            <button class="generic-btn" id="azureUploadButton">Upload</button>*@
+        </div>
+    </div>
+
+    <script>
+        const startButton = document.getElementById('startButton');
+        const stopButton = document.getElementById('stopButton');
+        const cameraPreview = document.getElementById('cameraPreview');
+        const previewVideo = document.getElementById('previewVideo');
+
+        /*var videoTitles = document.getElementById('videoTitle').value;
+        var videoDescription = document.getElementById('videoDescription').value;
+        var thumbnail = document.getElementById('thumbnail');
+        var azureUploadButton = document.getElementById('azureUploadButton')*/
+
+        let stream;
+        let mediaRecorder;
+        let chunks = [];
+        let file;
+
+        startButton.addEventListener('click', startRecording);
+        stopButton.addEventListener('click', stopRecording);
+
+        async function startCameraPreview() {
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+                cameraPreview.srcObject = stream;
+            } catch (error) {
+                console.error('Error accessing media devices:', error);
+            }
+        }
+
+        async function startRecording() {
+            chunks = [];
+            await startCameraPreview();
+
+            previewContainer.style.display = 'none';
+            startButton.style.display = 'none';
+            stopButton.style.display = 'inline-block';
+
+            mediaRecorder = new MediaRecorder(stream);
+
+            mediaRecorder.ondataavailable = function (event) {
+                if (event.data && event.data.size > 0) {
+                    chunks.push(event.data);
+                }
+            };
+
+            mediaRecorder.onstop = function () {
+                let blob = new Blob(chunks, { type: 'video/mp4' });
+                //previewVideo.src = window.URL.createObjectURL(blob);
+                let url = URL.createObjectURL(blob);
+
+                previewVideo.src = url;
+                previewContainer.style.display = 'block';
+
+                startButton.style.display = 'inline-block';
+                stopButton.style.display = 'none';
+
+                var generatedUuid = uuid.v4();
+                var filename = `record.ios.${generatedUuid}.mp4`;
+
+                file = new File([blob], filename, { type: 'video/mp4' });
+
+                /*formData = new FormData();
+                formData.append('File', file);
+                formData.append('VideoTitle', 'User recording');
+                formData.append('VideoDescription', 'User recording description');
+                formData.append('FileType', 'recording');*/
+            };
+
+            mediaRecorder.start();
+        }
+
+        function stopRecording() {
+            mediaRecorder.stop();
+        }
+
+        startCameraPreview();
+
+        downloadButton.addEventListener('click', async function () {
+            try {
+                if (previewVideo.src) {
+                    let response = await fetch(previewVideo.src);
+                    const blob = await response.blob();
+                    const fileName = 'recording.mp4';
+                    const files = [new File([blob], fileName, { type: 'video/mp4' })];
+                    navigator.share({ files });
+                } else {
+                    console.error('No preview video available');
+                }
+            } catch (error) {
+                console.error('Error fetching or sharing video:', error);
+            }
+        });
+
+        document.getElementById('azureUploadButton').addEventListener('click', function () {
+            var form = document.getElementById('uploadForm');
+            var formData = new FormData(form);
+
+            formData.append('File', file);
+            formData.append('FileType', 'video');
+
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', '/api/Videos/Upload', true);
+            xhr.onload = function () {
+                if (xhr.status === 200) {
+                    console.log('Upload successful');
+                    alert('Upload successful');
+                } else {
+                    console.error('Upload failed');
+                    alert('Upload failed');
+                }
+            };
+            xhr.send(formData);
+        });
+
+        /*
+        async function azureUploadAPI() {
+            try {
+                const response = await fetch('/api/Videos/Upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                if (response.ok) {
+                    alert('File uploaded successfully');
+                } else {
+                    alert('Failed to upload the video!')
+                    console.error('File upload failed with status ' + response.status);
+                }
+            } catch (error) {
+                console.error('Error uploading file:', error);
+            }
+        };
+
+        azureUploadButton.addEventListener('click', async function () {
+            formData = new FormData();
+            formData.append('File', file);
+            formData.append('VideoTitle', videoTitle);
+            formData.append('VideoDescription', videoDescription);
+            formData.append('FileType', 'recording');
+            formData.append('Thumbnail', thumbnail);
+
+            azureUploadAPI();
+        });*/
+    </script>
+</body>

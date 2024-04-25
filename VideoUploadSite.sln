@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.9.34622.214
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VideoUploadSite", "VideoUploadSite\VideoUploadSite.csproj", "{3F5A65A5-E2D1-43A4-A6A9-86506E78F3E5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VideoConvertFunction", "VideoConvertFunction\VideoConvertFunction.csproj", "{CCD74800-AB0F-4635-8A5C-00D385E977B6}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3F5A65A5-E2D1-43A4-A6A9-86506E78F3E5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3F5A65A5-E2D1-43A4-A6A9-86506E78F3E5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3F5A65A5-E2D1-43A4-A6A9-86506E78F3E5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3F5A65A5-E2D1-43A4-A6A9-86506E78F3E5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CCD74800-AB0F-4635-8A5C-00D385E977B6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CCD74800-AB0F-4635-8A5C-00D385E977B6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CCD74800-AB0F-4635-8A5C-00D385E977B6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CCD74800-AB0F-4635-8A5C-00D385E977B6}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {23938B56-2DBE-42FC-AC76-806937F08F45}
+	EndGlobalSection
+EndGlobal

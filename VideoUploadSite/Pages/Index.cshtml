@@ -1,0 +1,53 @@
+﻿@page
+@model VideoUploadSite.Pages.WatchVideoModel
+@{
+    ViewData["Title"] = "Home";
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="~/css/youtube-clone.css">
+    <title>VideoWeb App</title>
+</head>
+<body>
+@*     <header class="header">
+        <div class="search">
+            <input type="text" placeholder="Search" style="height:40px; vertical-align:middle;">
+            <button style="height:40px; vertical-align:middle;"><i class="material-icons">search</i></button>
+        </div>
+    </header> *@
+
+    <main class="main-content">
+        <div class="content">
+            @if (Model.Videos.Count < 1)
+            {
+                <h3>There are no videos uploaded, head to the video upload and make some!</h3>
+            }
+            else
+            {
+                <div class="video-grid">
+                    @foreach (var video in Model.Videos)
+                    {
+                        @if(!string.IsNullOrEmpty(video.ThumbnailUrl))
+                        {
+                            <div class="grid-item">
+                                <a href="/WatchVideo/@video.Id">
+                                    <div class="video-item">
+                                        <img src="@video.ThumbnailUrl" alt="Thumbnail">
+                                    </div>
+                                    <div class="video-info">
+                                        <p class="title">@video.VideoTitle</p>
+                                    </div>
+                                </a>
+                            </div>
+                        }
+                    }
+                </div>
+            }
+        </div>
+    </main>
+</body>
+</html>
