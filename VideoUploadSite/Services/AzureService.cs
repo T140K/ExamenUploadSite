@@ -86,7 +86,7 @@ namespace VideoUploadSite.Services
 
                 var fileName = Guid.NewGuid().ToString() + Path.GetExtension(thumbnail.FileName);//ändrar filens namn så att den får en guid på sig
                 var blobClient = blobContainerClient.GetBlobClient(fileName);
-                using (var stream = thumbnail.OpenReadStream())
+                using (var stream = thumbnail.OpenReadStream())//öppnar filen för att bli läst
                 {
                     await blobClient.UploadAsync(stream, true);//upload av filen till blobstorage containern
                 }
@@ -110,7 +110,6 @@ namespace VideoUploadSite.Services
                 await blobContainerClient.CreateIfNotExistsAsync();
 
                 var blobClient = blobContainerClient.GetBlobClient(fileName);
-
                 await using var fileStream = File.OpenRead(filePath);
                 await blobClient.UploadAsync(fileStream, true);
 
