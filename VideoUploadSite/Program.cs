@@ -40,17 +40,16 @@ namespace VideoUploadSite
                     sqlOptions.EnableRetryOnFailure();
                 }));
 
-          
             var blobStorageConnectionString = builder.Configuration.GetConnectionString("BlobConnectionString");
             builder.Services.AddSingleton(x => new BlobServiceClient(blobStorageConnectionString));
 
-            
+            //tester för att limit max upload size till azure blob storage
             builder.Services.Configure<KestrelServerOptions>(options =>
             {
                 options.Limits.MaxRequestBodySize = 2147483648;
             });
 
-            
+            //tester för att limit max upload size till azure blob storage
             builder.Services.Configure<FormOptions>(x =>
             {
                 x.MultipartBodyLengthLimit = 2147483648; //2GB

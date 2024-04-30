@@ -1,16 +1,16 @@
-// upload-script.js
+// script för upload page
 
 document.addEventListener("DOMContentLoaded", function () {
     const form = document.getElementById('uploadForm');
     form.addEventListener('submit', async function (event) {
         event.preventDefault();
-        const fileInput = document.getElementById('file');
+        const fileInput = document.getElementById('file');//måste ha med en video
         if (fileInput.files.length === 0) {
             alert('Please select a video file to upload.');
             return;
         }
 
-        const file = fileInput.files[0];
+        const file = fileInput.files[0];//max 50 mb som blev en limit vi senare fick
         if (file.size > 50 * 1024 * 1024) {
             alert('Please select a video file smaller than 50MB.');
             return;
@@ -19,7 +19,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const formData = new FormData(form);
 
         try {
-            const response = await fetch(form.action, {
+            const response = await fetch(form.action, {//post
                 method: 'POST',
                 body: formData
             });

@@ -8,10 +8,10 @@ namespace VideoUploadSite.Interface
 {
     public interface IAzureService
     {
-
+        //interface för Services/AzureService
         Task<string> UploadFileToBlobAsync(string containerName, string filePath, string fileName);
-        Task<IEnumerable<VideoPlayerModel>> ListVideoUrlsAsync(string containerName);
+        Task<IEnumerable<VideoPlayerModel>> ListVideoUrlsAsync();
         Task<string> UploadThumbnailToBlobAsync(string containerName, IFormFile thumbnail);
         Task<bool> DeleteBlobAsync(string inputVideoUrl, string processedVideoUrl, string thumbnailUrl);
-    }   
+    }
 }

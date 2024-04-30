@@ -9,12 +9,12 @@ using VideoUploadSite.DTO;
 
 namespace VideoUploadSite.Data
 {
-    public class ApplicationDbContext : DbContext
+    public class ApplicationDbContext : DbContext //dbcontext för koppling med databasen
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {
         }
 
-        public DbSet<Video> Videos { get; set; }
+        public DbSet<Video> Videos { get; set; }//tabellen för databasen
     }
 }

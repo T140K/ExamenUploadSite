@@ -7,7 +7,7 @@ using VideoUploadSite.Models;
 
 namespace VideoUploadSite.Data
 {
-    public class ApplicationDbContext : DbContext
+    public class ApplicationDbContext : DbContext//basic dbcontext
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
 

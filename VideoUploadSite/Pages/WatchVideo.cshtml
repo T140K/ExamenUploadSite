@@ -11,6 +11,7 @@
 <body>
 
     <div>
+        @*om det finns en selectedvideo, visa den*@
         @if (Model.SelectedVideo != null)
         {
             <div class="main-container">
@@ -39,9 +40,9 @@
 
     <script src="~/js/videoStatusChecker.js"></script>
     <script>
-
+        //hämtar id av videon
         window.videoId = '@Model.SelectedVideo.Id';
-
+        //call till ta bort api i controllers
         function deleteVideo() {
             $.ajax({
                 type: "DELETE",
@@ -55,12 +56,13 @@
                 }
             });
         }
+        //samlar ändringar och gör api call till update controller
         function editVideo() {
             var newTitle = prompt("Enter new title:", "@Model.SelectedVideo.VideoTitle");
-            if(newTitle === null) { return; } 
+            if (newTitle === null) { return; }
 
             var newDescription = prompt("Enter new description:", "@Model.SelectedVideo.VideoDescription");
-            if(newDescription === null) { return; } 
+            if (newDescription === null) { return; }
 
             var videoId = '@Model.SelectedVideo.Id';
 
@@ -76,19 +78,19 @@
                 },
                 body: data
             })
-            .then(response => {
-                if(response.ok) {
-                    alert("Video updated successfully.");
-                    window.location.reload();
-                } else {
-                    response.text().then(text => { throw new Error(text) });
-                }
-            })
-            .catch(error => {
-                alert("An error occurred while updating the video: " + error.message);
-            });
+                .then(response => {
+                    if (response.ok) {
+                        alert("Video updated successfully.");
+                        window.location.reload();
+                    } else {
+                        response.text().then(text => { throw new Error(text) });
+                    }
+                })
+                .catch(error => {
+                    alert("An error occurred while updating the video: " + error.message);
+                });
         }
 
-    </script>   
+    </script>
 </body>
 </html>

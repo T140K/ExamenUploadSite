@@ -13,6 +13,8 @@
     <link rel="stylesheet" href="~/css/upload-style.css">
 </head>
 <body>
+    @*här används en from som samlar data och gör en call till uploadvideo controller från fromen genom specifera method="post" och action="..."
+    datan samlas till modellen som hämtas längst uppe i @model då det speciferas var videon ska vara osv*@
     <div class="upload-container">
         <h2>Upload Video</h2>
         <form id="uploadForm" method="post" action="/api/Videos/Upload" enctype="multipart/form-data">
@@ -35,6 +37,6 @@
             <button type="submit" class="upload-btn">Upload Video</button>
         </form>
     </div>
-    <script src="~/js/upload-script.js"></script>
+    <script src="~/js/upload-script.js"></script>@*script för uppladdningen*@
 </body>
 </html>

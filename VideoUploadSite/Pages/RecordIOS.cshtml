@@ -1,7 +1,7 @@
 ﻿@page
 @model VideoUploadSite.Pages.iosrecordtestModel
 @{
-    //downlaod video to camera roll, 
+    //downlaod video to camera roll,
     //upload the previewvideo with title and desc
 }
 @section Scripts {
@@ -54,22 +54,7 @@
                     <input type="file" id="thumbnail" name="Thumbnail" accept="image/png, image/jpeg" />
                 </div>
                 <button type="button" class="generic-btn" id="azureUploadButton">Upload</button>
-                @*<input type="submit" value="Submit" class="generic-btn"/>*@
             </form>
-
-            @*<div class="form-group">
-                <label for="videoTitle">Video Title:</label>
-                <input type="text" id="videoTitle" name="VideoTitle" required />
-            </div>
-            <div class="form-group">
-                <label for="thumbnail">Select Thumbnail Image:</label>
-                <input type="file" id="thumbnail" name="Thumbnail" accept="image/png, image/jpeg" />
-            </div>
-            <div class="form-group">
-                <label for="videoDescription">Video Description:</label>
-                <textarea id="videoDescription" name="VideoDescription" required></textarea>
-            </div>
-            <button class="generic-btn" id="azureUploadButton">Upload</button>*@
         </div>
     </div>
 
@@ -78,11 +63,6 @@
         const stopButton = document.getElementById('stopButton');
         const cameraPreview = document.getElementById('cameraPreview');
         const previewVideo = document.getElementById('previewVideo');
-
-        /*var videoTitles = document.getElementById('videoTitle').value;
-        var videoDescription = document.getElementById('videoDescription').value;
-        var thumbnail = document.getElementById('thumbnail');
-        var azureUploadButton = document.getElementById('azureUploadButton')*/
 
         let stream;
         let mediaRecorder;
@@ -109,7 +89,7 @@
             startButton.style.display = 'none';
             stopButton.style.display = 'inline-block';
 
-            mediaRecorder = new MediaRecorder(stream);
+            mediaRecorder = new MediaRecorder(stream);//en basic version där man inte kan spela in skärmen utan bara kameran
 
             mediaRecorder.ondataavailable = function (event) {
                 if (event.data && event.data.size > 0) {
@@ -117,9 +97,8 @@
                 }
             };
 
-            mediaRecorder.onstop = function () {
+            mediaRecorder.onstop = function () {//med ios versionen kan man spela in videos i mp4 format direkt som är målet då de inte behövs konverteras
                 let blob = new Blob(chunks, { type: 'video/mp4' });
-                //previewVideo.src = window.URL.createObjectURL(blob);
                 let url = URL.createObjectURL(blob);
 
                 previewVideo.src = url;
@@ -132,12 +111,6 @@
                 var filename = `record.ios.${generatedUuid}.mp4`;
 
                 file = new File([blob], filename, { type: 'video/mp4' });
-
-                /*formData = new FormData();
-                formData.append('File', file);
-                formData.append('VideoTitle', 'User recording');
-                formData.append('VideoDescription', 'User recording description');
-                formData.append('FileType', 'recording');*/
             };
 
             mediaRecorder.start();
@@ -149,7 +122,7 @@
 
         startCameraPreview();
 
-        downloadButton.addEventListener('click', async function () {
+        downloadButton.addEventListener('click', async function () {//download knapp anpassad för ios
             try {
                 if (previewVideo.src) {
                     let response = await fetch(previewVideo.src);
@@ -185,34 +158,5 @@
             };
             xhr.send(formData);
         });
-
-        /*
-        async function azureUploadAPI() {
-            try {
-                const response = await fetch('/api/Videos/Upload', {
-                    method: 'POST',
-                    body: formData
-                });
-                if (response.ok) {
-                    alert('File uploaded successfully');
-                } else {
-                    alert('Failed to upload the video!')
-                    console.error('File upload failed with status ' + response.status);
-                }
-            } catch (error) {
-                console.error('Error uploading file:', error);
-            }
-        };
-
-        azureUploadButton.addEventListener('click', async function () {
-            formData = new FormData();
-            formData.append('File', file);
-            formData.append('VideoTitle', videoTitle);
-            formData.append('VideoDescription', videoDescription);
-            formData.append('FileType', 'recording');
-            formData.append('Thumbnail', thumbnail);
-
-            azureUploadAPI();
-        });*/
     </script>
 </body>

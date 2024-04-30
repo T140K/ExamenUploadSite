@@ -36,37 +36,37 @@ namespace VideoUploadSite.Services
         }
         #endregion
 
-        public async Task<IEnumerable<VideoPlayerModel>> ListVideoUrlsAsync(string containerName)
+        public async Task<IEnumerable<VideoPlayerModel>> ListVideoUrlsAsync()
         {
             try
             {
-                var videos = await _context.Videos.ToListAsync();
-                videos.Reverse();
+                var videos = await _context.Videos.ToListAsync();//hämtar allt från databasen
+                videos.Reverse();//ändrar ordningen av vidos som hämtas så att videon som ladda upp sist är längst uppe
 
-                if (videos.Count == 0)
+                if (videos.Count == 0)//om det inte finns videos som hämtades loggas det
                 {
                     _logger.LogWarning("No videos were found in the database.");
                 }
 
                 List<VideoPlayerModel> videoList = new List<VideoPlayerModel>();
 
-                foreach (var video in videos)
+                foreach (var video in videos)//hämtar alla videos från databasen till en lista
                 {
-                    _logger.LogTrace($"{video.Id} - {video.Title} \n {video.ProcessedVideoBlobUrl ?? video.VideoBlobUrl} \n {video.ThumbnailUrl}");
+                    _logger.LogTrace($"{video.Id} - {video.Title} \n {video.ProcessedVideoBlobUrl ?? video.VideoBlobUrl} \n {video.ThumbnailUrl}");//logging
 
                     VideoPlayerModel videoModel = new VideoPlayerModel
                     {
                         Id = video.Id,
                         VideoTitle = video.Title,
                         VideoDescription = video.Description,
-                        VideoUrl = video.ProcessedVideoBlobUrl ?? video.VideoBlobUrl,
+                        VideoUrl = video.ProcessedVideoBlobUrl ?? video.VideoBlobUrl,//hämta processed video först om den finns, annars hämta input video
                         ThumbnailUrl = video.ThumbnailUrl
                     };
 
                     videoList.Add(videoModel);
                 }
 
-                return videoList; //DB till Video, Video ska g� till videoplayermodel, videoplayermodel ska till index, index t user
+                return videoList;
 
             }
             catch (Exception ex)
@@ -80,19 +80,19 @@ namespace VideoUploadSite.Services
         {
             try
             {
-                var blobServiceClient = new BlobServiceClient(_storageConnectionString);
-                var blobContainerClient = blobServiceClient.GetBlobContainerClient(containerName);
-                await blobContainerClient.CreateIfNotExistsAsync(PublicAccessType.Blob);
+                var blobServiceClient = new BlobServiceClient(_storageConnectionString);//connect med azure blob storage
+                var blobContainerClient = blobServiceClient.GetBlobContainerClient(containerName);//går in i container som speciferades
+                await blobContainerClient.CreateIfNotExistsAsync(PublicAccessType.Blob);//om containern inte finns skapas den, alltså thumbnail container
 
-                var fileName = Guid.NewGuid().ToString() + Path.GetExtension(thumbnail.FileName);
+                var fileName = Guid.NewGuid().ToString() + Path.GetExtension(thumbnail.FileName);//ändrar filens namn så att den får en guid på sig
                 var blobClient = blobContainerClient.GetBlobClient(fileName);
                 using (var stream = thumbnail.OpenReadStream())
                 {
-                    await blobClient.UploadAsync(stream, true);
+                    await blobClient.UploadAsync(stream, true);//upload av filen till blobstorage containern
                 }
 
                 _logger.LogInformation($"Uploaded thumbnail '{fileName}' to container '{containerName}'.");
-                return blobClient.Uri.AbsoluteUri;
+                return blobClient.Uri.AbsoluteUri;//return med länken till bloben som laddades uppp
             }
             catch (Exception ex)
             {
@@ -101,7 +101,7 @@ namespace VideoUploadSite.Services
             }
         }
 
-        public async Task<string> UploadFileToBlobAsync(string containerName, string filePath, string fileName)
+        public async Task<string> UploadFileToBlobAsync(string containerName, string filePath, string fileName)//samma som ovan men med en video
         {
             try
             {
@@ -124,28 +124,31 @@ namespace VideoUploadSite.Services
             }
         }
 
-        public async Task<bool> DeleteBlobAsync(string inputVideoUrl, string processedVideoUrl, string thumbnailUrl)
+        public async Task<bool> DeleteBlobAsync(string inputVideoUrl, string processedVideoUrl, string thumbnailUrl)//delete
         {
             var blobServiceClient = new BlobServiceClient(_storageConnectionString);
 
-            var inputvideosContainer = blobServiceClient.GetBlobContainerClient("input-videos");
+            var inputvideosContainer = blobServiceClient.GetBlobContainerClient("input-videos");//hämtar en connection till varsin container
             var processedvideosContainer = blobServiceClient.GetBlobContainerClient("processed-videos");
             var thumbnailContainer = blobServiceClient.GetBlobContainerClient("thumbnails");
 
-            string inputVideoBlobName = ExtractBlobNameFromUrl(inputVideoUrl);
+            string inputVideoBlobName = ExtractBlobNameFromUrl(inputVideoUrl);//hämtar filnamnet från länken av parametern
             string processedVideoBlobName = ExtractBlobNameFromUrl(processedVideoUrl);
             string thumbnailBlobName = ExtractBlobNameFromUrl(thumbnailUrl);
 
+            //hittar filnamnet i containern, alltså kollar om det finns en sådana blob i containern man kollar i
             bool inputVideoFound = await BlobExistsInContainerAsync(inputvideosContainer, inputVideoBlobName);
             bool processedVideoFound = await BlobExistsInContainerAsync(processedvideosContainer, processedVideoBlobName);
             bool thumbnailFound = await BlobExistsInContainerAsync(thumbnailContainer, thumbnailBlobName);
 
+            //om det finns en thumbnail OCH en inputvideo eller processed eller både en input och processed kommer allt som finns tas bort
             if (thumbnailFound && (inputVideoFound || processedVideoFound))
             {
                 bool inputVideosDeleted = await DeleteBlobFromContainerAsync(inputvideosContainer, inputVideoBlobName);
                 bool processedVideosDeleted = await DeleteBlobFromContainerAsync(processedvideosContainer, processedVideoBlobName);
                 bool thumbnailDeleted = await DeleteBlobFromContainerAsync(thumbnailContainer, thumbnailBlobName);
-                
+
+                //om borttagningen av videos lyckas för thumbnail, och en eller både input eler processed video retrn true
                 if (thumbnailDeleted && (inputVideosDeleted || processedVideosDeleted))
                 {
                     return true;
@@ -154,27 +157,12 @@ namespace VideoUploadSite.Services
 
             return false;
         }
-        private async Task<bool> DeleteBlobFromContainerAsync(BlobContainerClient container, string blobName)
+
+        private string ExtractBlobNameFromUrl(string url)
         {
-            try
-            {
-                var blobClient = container.GetBlobClient(blobName);
-                if (blobClient != null)
-                {
-                    await blobClient.DeleteAsync();
-                    return true;
-                }
-
-                return false;
-            }
-            catch (RequestFailedException ex)
-            {
-                // Handle any errors that occur during the deletion
-                Console.WriteLine($"An error occurred while deleting blob '{blobName}': {ex.Message}");
-                return false;
-            }
+            Uri uri = new Uri(url);
+            return Path.GetFileName(uri.LocalPath);
         }
-
 
         private async Task<bool> BlobExistsInContainerAsync(BlobContainerClient containerClient, string blobName)
         {
@@ -201,11 +189,24 @@ namespace VideoUploadSite.Services
                 return false;
             }
         }
-
-        private string ExtractBlobNameFromUrl(string url)
+        private async Task<bool> DeleteBlobFromContainerAsync(BlobContainerClient container, string blobName)
         {
-            Uri uri = new Uri(url);
-            return Path.GetFileName(uri.LocalPath);
+            try
+            {
+                var blobClient = container.GetBlobClient(blobName);
+                if (blobClient != null)
+                {
+                    await blobClient.DeleteAsync();
+                    return true;
+                }
+
+                return false;
+            }
+            catch (RequestFailedException ex)
+            {
+                Console.WriteLine($"An error occurred while deleting blob '{blobName}': {ex.Message}");
+                return false;
+            }
         }
     }
 }

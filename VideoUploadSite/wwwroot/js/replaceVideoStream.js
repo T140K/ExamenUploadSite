@@ -1,4 +1,5 @@
 ﻿'use strict';
+//det fungerade inte hämta stremaswitchern så
 
 async function init(debug) {
     if (debug) {

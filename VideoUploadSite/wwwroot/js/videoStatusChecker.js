@@ -1,6 +1,6 @@
 // videoStatusChecker.js
-
-document.addEventListener("DOMContentLoaded", function() {
+//det som kollar om videon har blivit processed ännu
+document.addEventListener("DOMContentLoaded", function () {
     const videoId = window.videoId; // Assume the videoId is set globally on the window object
     if (videoId) {
         checkProcessingStatus(videoId);
@@ -11,7 +11,7 @@ async function checkProcessingStatus(videoId) {
     const statusText = document.getElementById('processing-status');
     const maxAttempts = 5;
     let attempts = 0;
-    let delay = 5000; 
+    let delay = 5000;
 
     while (attempts < maxAttempts) {
         try {
@@ -38,5 +38,5 @@ async function checkProcessingStatus(videoId) {
 function updateStatusDisplay(isReady) {
     const statusText = document.getElementById('processing-status');
     statusText.textContent = isReady ? 'Video processed' : 'Video is being processed...';
-    statusText.style.display = 'block'; 
+    statusText.style.display = 'block';
 }

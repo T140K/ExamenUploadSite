@@ -9,29 +9,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="~/css/youtube-clone.css">
+    <link rel="stylesheet" href="~/css/youtube-clone.css">@*css*@
     <title>VideoWeb App</title>
 </head>
 <body>
-@*     <header class="header">
-        <div class="search">
-            <input type="text" placeholder="Search" style="height:40px; vertical-align:middle;">
-            <button style="height:40px; vertical-align:middle;"><i class="material-icons">search</i></button>
-        </div>
-    </header> *@
-
     <main class="main-content">
         <div class="content">
-            @if (Model.Videos.Count < 1)
+            @if (Model.Videos.Count < 1)//om det finns mindre än 1 video så visas detta meddelande
             {
                 <h3>There are no videos uploaded, head to the video upload and make some!</h3>
             }
             else
             {
                 <div class="video-grid">
-                    @foreach (var video in Model.Videos)
+                    @foreach (var video in Model.Videos)//videos hämtas i watchvideo codebehind, displayas här, länkar till watchvideo med id av videon man klickade på
                     {
-                        @if(!string.IsNullOrEmpty(video.ThumbnailUrl))
+                        @if (!string.IsNullOrEmpty(video.ThumbnailUrl))
                         {
                             <div class="grid-item">
                                 <a href="/WatchVideo/@video.Id">

@@ -7,12 +7,12 @@ using System.Threading.Tasks;
 
 namespace VideoUploadSite.DTO
 {
-    public class Video
+    public class Video//modell för databasen
     {
         [Key]
         public int Id { get; set; }
-        public string FileName { get; set; }  
-        public string BlobName { get; set; }  
+        public string FileName { get; set; }
+        public string BlobName { get; set; }
         public string Title { get; set; }
         public string Description { get; set; }
         public string VideoBlobUrl { get; set; }

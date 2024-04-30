@@ -2,7 +2,7 @@
 
 namespace VideoUploadSite.Models
 {
-    public class Video
+    public class Video //codefirst databasen
     {
         [Key]
         public int Id { get; set; }

@@ -17,10 +17,11 @@
 </head>
 <body>
     <script>
+        //om användaren använder sig av ios eller mac så kommer den skickas till annan variant då mac och ios inte supportar inspelning av videos och den sidan man skickar till
+        //har annan/limited funktionalitet
         function isIos() {
-            return /iPhone|iPad|iPod|Macintosh|Mac OS X/i.test(navigator.userAgent);
+            return /iPhone|iPad|iPod|Macintosh|Mac OS X/i.test(navigator.userAgent);//kollar om de ios
         }
-
         if (isIos()) {
             window.location.href = '/RecordIOS'
         }
@@ -38,7 +39,7 @@
         </div>
 
         <br />
-
+        @*preview som göms sig tills en video finns inspelad som man kan ladda ner eller skicka genom uploadvideo controller*@
         <div id="previewContainer" style="display: none; padding: 20px;">
             <video id="previewVideo" controls style="width:100%; max-width:600px;"></video>
             <br />
@@ -59,7 +60,6 @@
                     <input type="file" id="thumbnail" name="Thumbnail" accept="image/png, image/jpeg" />
                 </div>
                 <button type="button" class="generic-btn" id="azureUploadButton">Upload</button>
-                @*<input type="submit" value="Submit" class="generic-btn"/>*@
             </form>
         </div>
     </div>
@@ -68,8 +68,11 @@
 
 
 
-   
+
     <script>
+        // här finns koden som startar en lokal samtal med sig själv då delen som skickar video samtalet är input och andra delen som recive samtalety är output
+        //input används för att skicka in en stream som kamera eller användarens skärm, och outputen används för att spela in input, som är en workaround för ett problem jag hade
+        //det kommer från https://cdn.jsdelivr.net/gh/meething/StreamSwitcher@latest/js/ReplaceableMediaStream.js och jag kopiera den in lokalt pga en bugg
         function isFirefox() {
             return navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
         }
@@ -293,12 +296,12 @@
     </script>
     <script>
         // --------------------------------------- site js -------------------------------
-        if (!supported()) {
+        if (!supported()) { //om webbläsaren inte stöder nån del så kommer det bara upp en error
             console.error("Browser does not support this functionality!")
             document.getElementById("error").innerHTML = 'Browser not supported <a href="https://caniuse.com/#search=captureStream">Info</a>';
         }
 
-        var remoteVideo = document.getElementById('remoteVideo');
+        var remoteVideo = document.getElementById('remoteVideo'); //remotevideo är videon som används för att visa upp till användaren och spela in
 
         var toggleButton = document.getElementById('toggleButton');
         var recordButton = document.getElementById('recordButton');
@@ -318,16 +321,27 @@
             remoteVideo.srcObject = tempStream.remoteStream;
         }, 500);
 
+        toggleButton.addEventListener('click', function () {//knappen för växla mellan användares karmera och skärm
+            if (currentMediaType === 'camera') {
+                startMedia('screen');
+                console.log("Switching to screen");
+            } else {
+                startMedia('camera');
+                console.log("Switching to camera");
+            }
+        });
+
         async function startMedia(type) {
             try {
-                if (type === 'camera') {
+                if (type === 'camera') {//om kanppen är kamera så kommer den hämta videotrack och audiotrack och genom .js filen jag hämtar in använda sig av replaceAudioStream för att
+                    //smidigt byta ut stream av samtalet
                     const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
                     stream.replaceVideoTrack(stream.getVideoTracks()[0])
                     stream.replaceAudioTrack(stream.getAudioTracks()[0])
 
                     currentMediaType = 'camera';
 
-                } else if (type === 'screen') {
+                } else if (type === 'screen') {//samma som ovan men för skärmen
                     const stream = await navigator.mediaDevices.getDisplayMedia({ audio: true, video: true });
                     stream.replaceVideoTrack(stream.getVideoTracks()[0])
 
@@ -338,20 +352,24 @@
             }
         }
 
-        startMedia('camera');
+        startMedia('camera');// gör så att man alltid börjar med att se kameran
 
-        toggleButton.addEventListener('click', function () {
-            if (currentMediaType === 'camera') {
-                startMedia('screen');
-                console.log("Switching to screen");
+        recordButton.addEventListener('click', function () {//record kanppen som är byggd som en toggle som startar och stoppar inspelningen
+            console.log("recording button clicked")
+
+            if (!isRecording) {
+                chunks = [];
+                startRecording();
+                recordButton.textContent = 'Stop Recording';
             } else {
-                startMedia('camera');
-                console.log("Switching to camera");
+                stopRecording();
+                recordButton.textContent = 'Start Recording';
+
             }
         });
 
-        function startRecording() {
-            if (isFirefox())
+        function startRecording() { //knapp för starta inspleningen
+            if (isFirefox()) //om firefox använder recordern av en annorlunda funktion
             {
                 mediaRecorder = new MediaRecorder(remoteVideo.mozCaptureStream());
             }
@@ -359,13 +377,13 @@
                 mediaRecorder = new MediaRecorder(remoteVideo.captureStream());
             }
 
-            mediaRecorder.ondataavailable = function (event) {
+            mediaRecorder.ondataavailable = function (event) { //när inspelningen ´startas så sparas data till chunks
                 if (event.data.size > 0) {
                     chunks.push(event.data);
                 }
             };
 
-            mediaRecorder.onstop = function () {
+            mediaRecorder.onstop = function () {// när inspelningen avslutas så skapas en blob av alla chunks som används till en url då man kan ladda ner videon i format webm
                 var blob = new Blob(chunks, { type: 'video/webm' });
                 var url = URL.createObjectURL(blob);
 
@@ -381,32 +399,18 @@
                 file = new File([blob], filename, { type: 'video/webm' });
             };
 
-            mediaRecorder.start();
-            isRecording = true;
+            mediaRecorder.start(); //det som startar inspelningen när man klickar på knappen
+            isRecording = true;//bool som säger om att inspelningen startades
         }
 
-        function stopRecording() {
+        function stopRecording() {//när man klickar på kanppen stop så används denna funktion för att ändra bool o avsluta inspelningen
             if (mediaRecorder && isRecording) {
                 mediaRecorder.stop();
                 isRecording = false;
             }
         }
 
-        recordButton.addEventListener('click', function () {
-            console.log("recording button clicked")
-
-            if (!isRecording) {
-                chunks = [];
-                startRecording();
-                recordButton.textContent = 'Stop Recording';
-            } else {
-                stopRecording();
-                recordButton.textContent = 'Start Recording';
-
-            }
-        });
-
-        downloadButton.addEventListener('click', function () {
+        downloadButton.addEventListener('click', function () {//knappen för ladda ner videon man spelade in
             if (previewVideo.src) {
                 var a = document.createElement('a');
                 document.body.appendChild(a);
@@ -418,33 +422,7 @@
             }
         });
 
-        /*
-        var videoTitleInput = document.getElementById('videoTitle');
-        var videoDescriptionInput = document.getElementById('videoDescription');
-        var thumbnailInput = document.getElementById('thumbnail');
-
-        const form = document.querySelector("#uploadForm");
-
-        async function sendData() {
-            const formData = new FormData(form);
-
-            try {
-                const response = await fetch("/api/Videos/Upload", {
-                    method: "POST",
-                    body: formData,
-                });
-                console.log(await response.json());
-            } catch (e) {
-                console.error(e);
-            }
-        }
-
-        form.addEventListener("submit", (event) => {
-            event.perventDefault();
-            sendData();
-        })*/
-
-        document.getElementById('azureUploadButton').addEventListener('click', function () {
+        document.getElementById('azureUploadButton').addEventListener('click', function () {//knappen för att ladda upp videon genom form som finns i html
             var form = document.getElementById('uploadForm');
             var formData = new FormData(form);
 
@@ -464,41 +442,6 @@
             };
             xhr.send(formData);
         });
-
-        /*
-        azureUploadButton.addEventListener('click', async function () {
-        
-            var videoTitle = videoTitleInput.value;
-            var videoDescription = videoDescriptionInput.value;
-            var thumbnail = thumbnailInput.files[0];
-
-            if (!videoTitle) {
-                alert('Please fill the title at least');
-                return;
-            }
-
-            formData = new FormData();
-            formData.append('File', file);
-            formData.append('VideoTitle', videoTitle);
-            formData.append('VideoDescription', videoDescription);
-            formData.append('FileType', 'recording');
-            formData.append('Thumbnail', thumbnail);
-
-            try {
-                const response = await fetch('/api/Videos/Upload', {
-                    method: 'POST',
-                    body: formData
-                });
-                if (response.ok) {
-                    alert('File uploaded successfully');
-                } else {
-                    alert('Failed to upload the video!')
-                    console.error('File upload failed with status ' + response.status);
-                }
-            } catch (error) {
-                console.error('Error uploading file:', error);
-            }
-        });*/
     </script>
 </body>
 </html>
