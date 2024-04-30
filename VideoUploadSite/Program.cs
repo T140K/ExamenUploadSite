@@ -1,10 +1,12 @@
 using Azure.Storage.Blobs;
 using Microsoft.AspNetCore.Http.Features;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
 using VideoUploadSite.Data;
 using VideoUploadSite.Interface;
 using VideoUploadSite.Services;
+using VideoUploadSite.Models;
 
 namespace VideoUploadSite
 {
@@ -40,16 +42,22 @@ namespace VideoUploadSite
                     sqlOptions.EnableRetryOnFailure();
                 }));
 
+            builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = false).AddEntityFrameworkStores<ApplicationDbContext>();
+
+            /*builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
+                .AddEntityFrameworkStores<ApplicationDbContext>()
+                .AddDefaultTokenProviders();*/
+
             var blobStorageConnectionString = builder.Configuration.GetConnectionString("BlobConnectionString");
             builder.Services.AddSingleton(x => new BlobServiceClient(blobStorageConnectionString));
 
-            //tester för att limit max upload size till azure blob storage
+            //tester fï¿½r att limit max upload size till azure blob storage
             builder.Services.Configure<KestrelServerOptions>(options =>
             {
                 options.Limits.MaxRequestBodySize = 2147483648;
             });
 
-            //tester för att limit max upload size till azure blob storage
+            //tester fï¿½r att limit max upload size till azure blob storage
             builder.Services.Configure<FormOptions>(x =>
             {
                 x.MultipartBodyLengthLimit = 2147483648; //2GB
@@ -70,9 +78,8 @@ namespace VideoUploadSite
 
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
-
-            app.MapRazorPages();
 
             app.UseCors("CorsVideoPolicy");
             app.MapControllers();
