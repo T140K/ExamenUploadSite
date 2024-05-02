@@ -42,7 +42,20 @@ namespace VideoUploadSite
                     sqlOptions.EnableRetryOnFailure();
                 }));
 
+
+            //finns för att lägga till egna rader till user table och har options som requireconfrim, alltså måste användaren confrim sin email som ajg stängde av
             builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = false).AddEntityFrameworkStores<ApplicationDbContext>();
+            builder.Services.Configure<IdentityOptions>(options =>
+            {
+                options.Password.RequireDigit = false;
+                options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequireUppercase = false;
+                options.Password.RequireLowercase = false;
+                options.Password.RequiredLength = 0;
+
+                options.User.RequireUniqueEmail = true;
+                options.Lockout.MaxFailedAccessAttempts = int.MaxValue;
+            });
 
             /*builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>()
