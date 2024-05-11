@@ -4,14 +4,25 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using VideoUploadSite.Models;
 using VideoUploadSite.Services;
+using Microsoft.AspNetCore.Authorization;
+using VideoUploadSite.Models.DTO;
 
 namespace VideoUploadSite.Pages
 {
+    [AllowAnonymous]
     public class IndexModel : PageModel
     {
-        public void OnGet()
-        {
+        private readonly IAzureService _azureService;
 
+        public IndexModel(IAzureService azureService)
+        {
+            _azureService = azureService;
+        }
+        public List<VideoPlayerModel> Videos { get; private set; }
+
+        public async Task OnGetAsync()
+        {
+            Videos = (await _azureService.ListVideoUrlsAsync()).ToList();
         }
     }
 }

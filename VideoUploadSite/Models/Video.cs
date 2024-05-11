@@ -15,5 +15,6 @@ namespace VideoUploadSite.Models
         public string? BlobName { get; set; } = null;
         public bool ShouldGenerateThumbnail { get; set; }
         public string? ProcessingStatus { get; set; }
+        public string? VideoOwner { get; set; }
     }
 }

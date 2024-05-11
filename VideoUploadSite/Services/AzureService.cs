@@ -18,7 +18,7 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Azure;
 
 namespace VideoUploadSite.Services
-{
+{//måste inte authorize services eftersom services kallas bara från Authorize controllers och Authorize pages
     public class AzureService : IAzureService
     {
         # region Dependency Injection / Constructor

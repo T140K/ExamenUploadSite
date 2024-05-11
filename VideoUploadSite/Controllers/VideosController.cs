@@ -12,6 +12,7 @@ using VideoUploadSite.Models;
 using VideoUploadSite.Models.DTO;
 using System.Net.Http.Json;
 using Microsoft.VisualBasic.FileIO;
+using Microsoft.AspNetCore.Authorization;
 
 namespace VideoUploadSite.Controllers
 {
@@ -29,7 +30,7 @@ namespace VideoUploadSite.Controllers
             _azureService = azureService ?? throw new ArgumentNullException(nameof(azureService));
             _logger = logger;
         }
-
+        [Authorize]
         [HttpPost("Upload")]
         [RequestSizeLimit(200_000_000)]
         public async Task<IActionResult> UploadVideo([FromForm] VideoUploadDto uploadDto)
@@ -101,6 +102,7 @@ namespace VideoUploadSite.Controllers
             return Ok(video.ProcessingStatus);
         }
         //------------------------------------------------------------------------------------------------------------------------------------
+        [Authorize]
         [HttpDelete("DeleteVideo/{videoId}")]
         public async Task<IActionResult> DeleteVideo(int videoId)//ta bort video med id
         {
@@ -123,6 +125,8 @@ namespace VideoUploadSite.Controllers
 
             return Ok(RedirectToPage("/"));//efter man klickar deletevideo kommer en error eller så kommer man redirect
         }
+
+        [Authorize]
         [HttpPut("EditVideo/{videoId}")]//basic edit controller
         public async Task<IActionResult> EditVideo(int videoId, [FromBody] VideoEditDto editDto)
         {
