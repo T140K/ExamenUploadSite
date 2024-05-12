@@ -30,13 +30,15 @@
                         @if (video.VideoOwner == UserManager.GetUserId(User))
                         {
                             <div class="video-item">
-                                <div class="video-thumbnail">
-                                    <img src="@video.ThumbnailUrl" alt="Video Thumbnail">
-                                </div>
-                                <div class="video-info">
-                                    <h4>@video.VideoTitle</h4>
-                                    <p>@video.VideoDescription</p>
-                                </div>
+                                <a href="/WatchVideo/@video.Id">
+                                    <div class="video-thumbnail">
+                                        <img src="@video.ThumbnailUrl" alt="Video Thumbnail">
+                                    </div>
+                                    <div class="video-info">
+                                        <h4>@video.VideoTitle</h4>
+                                        <p>@video.VideoDescription</p>
+                                    </div>
+                                </a>
                             </div>
                         }
                     }

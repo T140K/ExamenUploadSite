@@ -17,5 +17,6 @@ namespace VideoUploadSite.Models.DTO
         public string? ThumbnailUrl { get; set; }
         public string? ThumbnailPath { get; set; }
         public string? VideoOwner { get; set; }
+        public string? VideoLink { get; set; }
     }
 }

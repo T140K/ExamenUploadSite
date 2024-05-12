@@ -50,6 +50,8 @@ namespace VideoUploadSite.Controllers
             var uniqueId = Guid.NewGuid().ToString();
             var fileName = $"{uniqueId}_{uploadDto.File.FileName}";
 
+            var videoLink = Path.GetFileNameWithoutExtension(fileName);
+
             var tempFilePath = Path.GetTempFileName();//skapar en temp fil
 
             using (var stream = System.IO.File.Create(tempFilePath))
@@ -87,7 +89,8 @@ namespace VideoUploadSite.Controllers
                 ThumbnailUrl = thumbnailBlobUrl,
                 ShouldGenerateThumbnail = shouldGenerateThumbnail,
                 ProcessingStatus = "Processing",
-                VideoOwner = userId
+                VideoOwner = userId,
+                VideoLink = videoLink
             };
 
             _context.Videos.Add(video);
