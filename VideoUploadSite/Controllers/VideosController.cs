@@ -13,6 +13,7 @@ using VideoUploadSite.Models.DTO;
 using System.Net.Http.Json;
 using Microsoft.VisualBasic.FileIO;
 using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace VideoUploadSite.Controllers
 {
@@ -30,11 +31,15 @@ namespace VideoUploadSite.Controllers
             _azureService = azureService ?? throw new ArgumentNullException(nameof(azureService));
             _logger = logger;
         }
-        [Authorize]
+
+        //[Authorize]
         [HttpPost("Upload")]
         [RequestSizeLimit(200_000_000)]
         public async Task<IActionResult> UploadVideo([FromForm] VideoUploadDto uploadDto)
         {
+            // hämta användares id 
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
             //limit för storleken av en video som kan laddas upp i controllern
             if (uploadDto.File == null || uploadDto.File.Length > 50 * 1024 * 1024)
             {
@@ -81,7 +86,8 @@ namespace VideoUploadSite.Controllers
                 BlobName = fileName,
                 ThumbnailUrl = thumbnailBlobUrl,
                 ShouldGenerateThumbnail = shouldGenerateThumbnail,
-                ProcessingStatus = "Processing"
+                ProcessingStatus = "Processing",
+                VideoOwner = userId
             };
 
             _context.Videos.Add(video);

@@ -1,0 +1,47 @@
+﻿@page
+
+@using Microsoft.AspNetCore.Identity
+@using VideoUploadSite.Models
+
+@inject UserManager<ApplicationUser> UserManager
+
+@model VideoUploadSite.Pages.MyVideosModel
+@{
+}
+
+<head>
+    <link rel="stylesheet" href="~/css/MyVideos.css">@*css*@
+</head>
+<body>
+    <div>
+        <h1>Hello @UserManager.GetUserName(User)</h1>
+        <h2>Here are your videos:</h2>
+
+        <div>
+            @if (Model.Videos.Count < 1)
+            {
+                <h3>You haven't uploaded any videos yet!</h3>
+            }
+            else
+            {
+                <div class="video-list">
+                    @foreach (var video in Model.Videos)
+                    {
+                        @if (video.VideoOwner == UserManager.GetUserId(User))
+                        {
+                            <div class="video-item">
+                                <div class="video-thumbnail">
+                                    <img src="@video.ThumbnailUrl" alt="Video Thumbnail">
+                                </div>
+                                <div class="video-info">
+                                    <h4>@video.VideoTitle</h4>
+                                    <p>@video.VideoDescription</p>
+                                </div>
+                            </div>
+                        }
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</body>
