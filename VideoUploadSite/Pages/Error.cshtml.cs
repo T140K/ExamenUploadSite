@@ -8,6 +8,8 @@ namespace VideoUploadSite.Pages;
 [IgnoreAntiforgeryToken]
 public class ErrorModel : PageModel
 {
+    public int StatusCode { get; set; }
+
     public string? RequestId { get; set; }
 
     public bool ShowRequestId => !string.IsNullOrEmpty(RequestId);
@@ -19,8 +21,9 @@ public class ErrorModel : PageModel
         _logger = logger;
     }
 
-    public void OnGet()
+    public void OnGet(int statusCode)
     {
+        StatusCode = statusCode;
         RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier;
     }
 }

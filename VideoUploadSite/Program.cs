@@ -82,6 +82,9 @@ namespace VideoUploadSite
                 app.UseHsts();
             }
 
+            //errorsidan visas upp vid på en oväntat error med errorkoden
+            app.UseStatusCodePagesWithReExecute("/Error/{0}");
+
             app.UseHttpsRedirection();
             app.UseStaticFiles();
 

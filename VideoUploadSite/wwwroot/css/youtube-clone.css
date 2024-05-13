@@ -102,3 +102,18 @@ body {
         grid-template-columns: 1fr;
     }
 }
+
+.link-item {
+    text-decoration: none;
+    color: #007bff;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+    .link-item:hover {
+        color: #0056b3;
+    }
+
+    .link-item:active {
+        opacity: 0.6;
+    }
