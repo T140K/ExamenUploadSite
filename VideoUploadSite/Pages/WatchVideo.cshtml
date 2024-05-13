@@ -1,4 +1,4 @@
-﻿@page "/WatchVideo/{videoId}"
+﻿@page "/WatchVideo/{VideoLink}"
 @model VideoUploadSite.Pages.WatchVideoModel
 
 @using Microsoft.AspNetCore.Identity
@@ -47,7 +47,7 @@
     <script src="~/js/videoStatusChecker.js"></script>
     <script>
         //hämtar id av videon
-        window.videoId = '@Model.SelectedVideo.Id';
+        window.VideoLink = '@Model.SelectedVideo.VideoLink';
         //call till ta bort api i controllers
         function deleteVideo() {
             $.ajax({

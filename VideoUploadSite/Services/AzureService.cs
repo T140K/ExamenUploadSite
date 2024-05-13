@@ -61,7 +61,8 @@ namespace VideoUploadSite.Services
                         VideoDescription = video.Description,
                         VideoUrl = video.ProcessedVideoBlobUrl ?? video.VideoBlobUrl,//hämta processed video först om den finns, annars hämta input video
                         ThumbnailUrl = video.ThumbnailUrl,
-                        VideoOwner = video.VideoOwner
+                        VideoOwner = video.VideoOwner,
+                        VideoLink = video.VideoLink,
                     };
 
                     videoList.Add(videoModel);

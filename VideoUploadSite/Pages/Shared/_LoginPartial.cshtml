@@ -12,7 +12,8 @@
                 @UserManager.GetUserName(User)
         </a>
         <ul class="dropdown-menu">
-            <li><a class="dropdown-item" asp-area="Identity" asp-page="/Account/Manage/Index"> Account</a></li>
+            @* <li><a class="dropdown-item" asp-area="Identity" asp-page="/Account/Manage/Index"> Account</a></li> *@
+            <li><a class="dropdown-item" asp-page="/MyVideos">My Videos</a></li>
             <li><hr class="dropdown-divider" /></li>
             <li><a class="dropdown-item" asp-area="Identity" asp-page="/Account/Logout">Logout</a></li>
         </ul>

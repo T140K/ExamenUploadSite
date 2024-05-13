@@ -30,15 +30,20 @@
                         @if (video.VideoOwner == UserManager.GetUserId(User))
                         {
                             <div class="video-item">
-                                <a href="/WatchVideo/@video.Id">
+                                <a class="link-item" href="/WatchVideo/@video.VideoLink">
                                     <div class="video-thumbnail">
                                         <img src="@video.ThumbnailUrl" alt="Video Thumbnail">
                                     </div>
+                                </a>
+                                <a class="link-item" href="/WatchVideo/@video.VideoLink">
                                     <div class="video-info">
                                         <h4>@video.VideoTitle</h4>
-                                        <p>@video.VideoDescription</p>
+                                        @* <p>@video.VideoDescription</p> *@
                                     </div>
                                 </a>
+                                <div class="copy-button">
+                                    <button class="upload-btn" onclick="copyUrl('@video.VideoLink')">Copy Link</button>
+                                </div>
                             </div>
                         }
                     }
@@ -47,3 +52,17 @@
         </div>
     </div>
 </body>
+
+<script>
+    function copyUrl(videoLink) {
+        const baseUrl = window.location.origin;
+        const fullUrl = `${baseUrl}${videoLink}`;
+        const el = document.createElement('textarea');
+        el.value = fullUrl;
+        document.body.appendChild(el);
+        el.select();
+        document.execCommand('copy');
+        document.body.removeChild(el);
+        alert('URL copied to clipboard');
+    }
+</script>
