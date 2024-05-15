@@ -1,7 +1,4 @@
-# Docs for the Azure Web Apps Deploy action: https://github.com/azure/functions-action
-# More GitHub Actions for Azure: https://github.com/Azure/actions
-
-name: Build and deploy dotnet core app to Azure Function App - VideoConvertFunction
+name: Build and deploy Azure Function App - VideoConvertFunction
 
 on:
   push:
@@ -9,44 +6,61 @@ on:
       - main
   workflow_dispatch:
 
+permissions:
+  contents: read
+  id-token: write
+
 env:
-  AZURE_FUNCTIONAPP_PACKAGE_PATH: '.' # set this to the path to your web app project, defaults to the repository root
-  DOTNET_VERSION: '6.x' # set this to the dotnet version to use
+  DOTNET_VERSION: '6.x'  # Specify the .NET version used by your Azure Function
 
 jobs:
-  build-and-deploy:
+  build:
     runs-on: windows-latest
-    permissions:
-      id-token: write #This is required for requesting the JWT
 
     steps:
-      - name: 'Checkout GitHub Action'
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup DotNet ${{ env.DOTNET_VERSION }} Environment
-        uses: actions/setup-dotnet@v1
+      - name: Set up .NET Core
+        uses: actions/setup-dotnet@v3
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
+          include-prerelease: true
 
-      - name: 'Resolve Project Dependencies Using Dotnet'
-        shell: pwsh
-        run: |
-          pushd './${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}'
-          dotnet build --configuration Release --output ./output
-          popd
-      
+      - name: Build Azure Function
+        run: dotnet build VideoConvertFunction/VideoConvertFunction.csproj --configuration Release
+
+      - name: Publish Azure Function
+        run: dotnet publish VideoConvertFunction/VideoConvertFunction.csproj --configuration Release --output ./publish
+
+      - name: Upload publish folder as artifact for deployment
+        uses: actions/upload-artifact@v4
+        with:
+          name: functionapp-artifact
+          path: ./publish
+
+  deploy:
+    runs-on: windows-latest
+    needs: build
+
+    steps:
+      - name: Download artifact from build job
+        uses: actions/download-artifact@v4
+        with:
+          name: functionapp-artifact
+          path: ./deploy-artifact
+
       - name: Login to Azure
-        uses: azure/login@v1
+        uses: azure/login@v3
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_39BB7594FAF34606BB402EE87AFE9F18 }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_0502E51A702047B8B0A09D68C9EDDAAF }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_B5E0586E43174DE98B7CBDAC888FB62D }}
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: 'Run Azure Functions Action'
-        uses: Azure/functions-action@v1
-        id: fa
+      - name: Deploy to Azure Function App
+        uses: azure/functions-action@v1
         with:
-          app-name: 'VideoConvertFunction'
-          slot-name: 'Production'
-          package: '${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}/output'
-          
+          app-name: 'VideoConvertFunction'  # Replace with your Azure Function App name
+          package: ./deploy-artifact
+
+      - name: List contents of the deployment package
+        if: failure()
+        run: ls -R ./deploy-artifact
