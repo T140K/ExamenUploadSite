@@ -48,4 +48,30 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: functionapp-artifact
-      
+          path: ../publish
+
+  deploy:
+    runs-on: windows-latest
+    needs: build
+
+    steps:
+      - name: Download artifact from build job
+        uses: actions/download-artifact@v4
+        with:
+          name: functionapp-artifact
+          path: ./deploy-artifact
+
+      - name: Login to Azure
+        uses: azure/login@v3
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Deploy to Azure Function App
+        uses: azure/functions-action@v1
+        with:
+          app-name: 'ExamensarbeteFunctionApp'  # Replace with your Azure Function App name
+          package: ./deploy-artifact
+
+      - name: List contents of the deployment package
+        if: failure()
+        run: ls -R ./deploy-artifact
