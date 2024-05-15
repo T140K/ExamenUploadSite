@@ -1,7 +1,4 @@
-# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
-# More GitHub Actions for Azure: https://github.com/Azure/actions
-
-name: Build and deploy ASP.Net Core app to Azure Web App - ExamenarbeteVideoUploadSite
+name: Build and deploy ASP.Net Core app to Azure Web App - VideoUploadSite
 
 on:
   push:
@@ -9,58 +6,68 @@ on:
       - main
   workflow_dispatch:
 
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  DOTNET_VERSION: '7.x'
+
 jobs:
+
   build:
     runs-on: windows-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
       - name: Set up .NET Core
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: '8.x'
+          dotnet-version: ${{ env.DOTNET_VERSION }}
           include-prerelease: true
 
-      - name: Build with dotnet
-        run: dotnet build --configuration Release
+      - name: Build and Publish Web App
+        run: dotnet publish VideoUploadSite/VideoUploadSite.csproj -c Release -o ${{github.workspace}}/publish
 
-      - name: dotnet publish
-        run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/myapp
-
-      - name: Upload artifact for deployment job
+      - name: Upload publish folder as artifact for deployment
         uses: actions/upload-artifact@v3
         with:
-          name: .net-app
-          path: ${{env.DOTNET_ROOT}}/myapp
+          name: webapp-artifact
+          path: ${{github.workspace}}/publish
 
   deploy:
     runs-on: windows-latest
     needs: build
+
     environment:
-      name: 'Production'
+      name: 'production'
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
-    permissions:
-      id-token: write #This is required for requesting the JWT
 
     steps:
       - name: Download artifact from build job
         uses: actions/download-artifact@v3
         with:
-          name: .net-app
-      
+          name: webapp-artifact
+          path: ${{github.workspace}}/deploy-artifact
+
       - name: Login to Azure
         uses: azure/login@v1
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_0B8E84F2DBB84376AE609E94C9A1DC44 }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_18536266CF584E2A8C33E3D5C210D820 }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_D38553FD5B2146248A25187D359C54C9 }}
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v2
         with:
-          app-name: 'ExamenarbeteVideoUploadSite'
-          slot-name: 'Production'
-          package: .
-          
+          app-name: 'ExamensarbeteVideoUploadSite'  # Replace with your Azure Web App name
+          package: ${{github.workspace}}/deploy-artifact
+
+      - name: Apply EF Core migrations
+        run: dotnet ef database update --connection ${{ secrets.AZURE_SQL_CONNECTION_STRING }}
+        working-directory: ./VideoUploadSite
+
+      - name: List contents of the deployment package
+        if: failure()
+        run: ls -R "${{github.workspace}}/deploy-artifact"
