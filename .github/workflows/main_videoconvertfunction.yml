@@ -28,10 +28,10 @@ jobs:
           include-prerelease: true
 
       - name: Build Azure Function
-        run: dotnet build VideoConvertFunction/VideoConvertFunction.csproj --configuration Release
+        run: dotnet build VideoUploadSite/VideoConvertFunction.csproj --configuration Release
 
       - name: Publish Azure Function
-        run: dotnet publish VideoConvertFunction/VideoConvertFunction.csproj --configuration Release --output ./publish
+        run: dotnet publish VideoUploadSite/VideoConvertFunction.csproj --configuration Release --output ./publish
 
       - name: Upload publish folder as artifact for deployment
         uses: actions/upload-artifact@v4
