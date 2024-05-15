@@ -64,10 +64,6 @@ jobs:
           app-name: 'ExamenarbeteVideoUploadSite'
           package: ${{github.workspace}}/deploy-artifact
 
-      - name: Apply EF Core migrations
-        run: dotnet ef database update --connection ${{ secrets.AZURE_SQL_CONNECTION_STRING }}
-        working-directory: ./VideoUploadSite
-
       - name: List contents of the deployment package
         if: failure()
         run: ls -R "${{github.workspace}}/deploy-artifact"
