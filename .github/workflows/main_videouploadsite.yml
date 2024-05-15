@@ -61,7 +61,7 @@ jobs:
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v2
         with:
-          app-name: 'ExamensarbeteVideoUploadSite'  # Replace with your Azure Web App name
+          app-name: 'ExamenarbeteVideoUploadSite'
           package: ${{github.workspace}}/deploy-artifact
 
       - name: Apply EF Core migrations
