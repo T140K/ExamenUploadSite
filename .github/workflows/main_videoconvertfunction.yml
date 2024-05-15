@@ -1,4 +1,4 @@
-name: Build and deploy Azure Function App - VideoConvertFunction
+name: Build and deploy dotnet core app to Azure Function App - functionconvert
 
 on:
   push:
@@ -6,72 +6,47 @@ on:
       - main
   workflow_dispatch:
 
-permissions:
-  contents: read
-  id-token: write
-
 env:
-  DOTNET_VERSION: '6.x'  # Specify the .NET version used by your Azure Function
+  AZURE_FUNCTIONAPP_PACKAGE_PATH: 'VideoConvertFunction' # Set this to the path to your Azure Function project
+  DOTNET_VERSION: '6.x' # Set this to the dotnet version to use
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: windows-latest
+    permissions:
+      id-token: write # This is required for requesting the JWT
 
     steps:
-      - name: Checkout repository
+      - name: 'Checkout GitHub Action'
         uses: actions/checkout@v4
 
-      - name: Set up .NET Core
+      - name: Setup DotNet ${{ env.DOTNET_VERSION }} Environment
         uses: actions/setup-dotnet@v3
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
-      - name: Display directory structure for debugging
-        run: dir
-
-      - name: Change to the function project directory
-        run: cd VideoConvertFunction
-
-      - name: Display function project directory structure for debugging
-        run: dir
-
-      - name: Restore dependencies
-        run: dotnet restore
-
-      - name: Build Azure Function
-        run: dotnet build VideoConvertFunction.csproj --configuration Release
-
-      - name: Publish Azure Function
-        run: dotnet publish VideoConvertFunction.csproj --configuration Release --output ../publish
-
-      - name: Upload publish folder as artifact for deployment
-        uses: actions/upload-artifact@v4
-        with:
-          name: functionapp-artifact
-          path: ../publish
-
-  deploy:
-    runs-on: windows-latest
-    needs: build
-
-    steps:
-      - name: Download artifact from build job
-        uses: actions/download-artifact@v4
-        with:
-          name: functionapp-artifact
-          path: ./deploy-artifact
-
+      - name: 'Resolve Project Dependencies Using Dotnet'
+        shell: pwsh
+        run: |
+          pushd './${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}'
+          dotnet build --configuration Release --output ./output
+          popd
+      
       - name: Login to Azure
-        uses: azure/login@v3
+        uses: azure/login@v1
         with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_CEA796D2445349D3AAC226918B1A734A }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_0EF006216DAD401F899A185B6C128DA3 }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_95906493152649A3800AE0E8FCB10DC1 }}
 
-      - name: Deploy to Azure Function App
-        uses: azure/functions-action@v1
+      - name: 'Run Azure Functions Action'
+        uses: Azure/functions-action@v1
+        id: fa
         with:
-          app-name: 'ExamensarbeteFunctionApp'  # Replace with your Azure Function App name
-          package: ./deploy-artifact
+          app-name: 'functionconvert'
+          slot-name: 'Production'
+          package: '${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}/output'
 
       - name: List contents of the deployment package
         if: failure()
-        run: ls -R ./deploy-artifact
+        run: ls -R '${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}/output'
