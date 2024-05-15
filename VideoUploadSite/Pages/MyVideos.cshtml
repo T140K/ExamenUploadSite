@@ -56,7 +56,7 @@
 <script>
     function copyUrl(videoLink) {
         const baseUrl = window.location.origin;
-        const fullUrl = `${baseUrl}${videoLink}`;
+        const fullUrl = `${baseUrl}/WatchVideo/${videoLink}`;
         const el = document.createElement('textarea');
         el.value = fullUrl;
         document.body.appendChild(el);
