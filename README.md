@@ -2,7 +2,9 @@
 
 Min repo för examenarbetet baserad på videouploadsite jag tidigare har gjort
 
-To run this project you need to configure appsettings.json in videouploadsite:
+Länken för examensarbetet: https://examenarbetevideouploadsite.azurewebsites.net/ 
+
+To run this project locally you need to configure appsettings.json in videouploadsite:
 
 {
   "DetailedErrors": true,
